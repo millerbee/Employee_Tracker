@@ -19,8 +19,9 @@ connection.connect(function(err) {
   userInfo();
 });
 
-
-// start off asking what user wants to do
+//***********************************************************************************************//
+// Main Menu Actions
+//**********************************************************************************************//
 function userInfo() {
 
  return inquirer.prompt([
@@ -51,8 +52,9 @@ function userInfo() {
     
     });
   }
- 
-  // to view emp, roles,dept or all
+ //*******************************************************************************************//
+  // Employee Actions
+  //*******************************************************************************************//
    function getEmpOptions() {
 
        inquirer.prompt(
@@ -83,7 +85,7 @@ function userInfo() {
     } 
   
     function getEmpTable(){     
-        connection.query("Select * FROM empdata", function(err, res){
+        connection.query("Select * FROM emp_data order by dept", function(err, res){
             if (err) throw err;
             console.log(err);
             console.table(res);
@@ -92,7 +94,7 @@ function userInfo() {
       }
     
       function addEmployee(){
-        connection.query("SELECT * FROM role", function (err, res) {
+        connection.query("SELECT * FROM roles", function (err, res) {
         if (err) throw err;
             inquirer
             .prompt([
@@ -142,11 +144,40 @@ function userInfo() {
                 })
             })
         }
-        
-//Department options
+        function removeEmp(){
+          connection.query("SELECT name FROM emp_view", function (err, res) {
+            if (err) throw err;  
+          })
+          inquirer
+         .prompt([
+             {
+                 name: "empId",
+                 type: "input", 
+                 message: "Select Department to remove:",
+                               
+               }
+             ]).then(function(answer) {
+                                                          
+               connection.query(
+               "DELETE from emp_view WHERE ?",
+               {
+                   empd_id: answer.empId
+               }
+               );
+               connection.query("SELECT name FROM emp_view", function (err, res) {
+                 if (err) throw err;          
+                   console.log("Employee has been removed");
+                   getDept();
+                 })
+               })
+         }
+          
 
 
 
+//********************************************************************************************//
+//Department Actions
+//*******************************************************************************************//
 function getDept() {
 
   inquirer.prompt(
@@ -182,41 +213,100 @@ function getDept() {
         }
       //add a department
          function addDepartment(){
-         connection.query("SELECT name FROM department", function (err, res) {
-         if (err) throw err;
+         
          inquirer
         .prompt([
             {
                 name: "depName",
                 type: "input", 
-                message: "Enter department name to add",
-                choices: function() {
-                  var deptArray = [];
-                  for (let i = 0; i < res.length; i++) {
-                      deptArray.push(res[i].name);
-                  }
-                  return deptArray;
-                },
+                message: "Enter department name to add:",
+                              
               }
             ]).then(function(answer) {
-              var deptId;
-              for (var i= 0; i< res.length; i++) {
-              if (res[i].name == answer.depName) {
-                  deptId = res[i];
-                  console.log(deptId)
-              }                  
-            }  
+                                                         
               connection.query(
               "INSERT INTO department SET ?",
               {
-                  dept_id: answer.deptId
-              },
-              function (err) {
-                  if (err) throw err;
-                  console.log("Depatment has been added!");
-                  userInfo();
+                  name: answer.depName
+              }
+              );
+              connection.query("SELECT name FROM department", function (err, res) {
+                if (err) throw err;          
+                  console.log("Depatment has been added.");
+                  getDept();
+                })
               })
-              
+        }
+          
+      //remove a department  
+        function removeDept(){
+          connection.query("SELECT name FROM department", function (err, res) {
+            console.table(res);
+            if (err) throw err; 
+          inquirer
+         .prompt([
+             {
+                 name: "depName",
+                 type: "input", 
+                 message: "Enter Department to remove:",
+                               
+               }
+             ]).then(function(answer) {
+                                                          
+               connection.query(
+               "DELETE from department WHERE ?",
+               {
+                   name: answer.depName
+               }
+               );
+               connection.query("SELECT name FROM department", function (err, res) {
+                 if (err) throw err;          
+                   console.log("Depatment has been removed");
+                   getDept();
+                 })
+               })
+         })
+        }
+          
+ //******************************************************************************************************//      
+     // Manager Actions
+ //*****************************************************************************************************//
+
+ function  getManager(){
+
+    inquirer.prompt(
+      {
+        type: "list",
+        message: "Select an action:",
+        name: "managerAction",
+        choices: ["View Managers", "View Employees By Manager", "Update Employee Manager","Main Menu"]           
+       },
+
+      ).then(function({managerAction}) {
+        if(managerAction === "View Departments"){   
+          getManagerNames();
+
+        }else if(managerAction === "Add Department"){           
+          viewEmpManagers(); 
+
+        }else if(managerAction === "Update Employee Manager"){
+          updateEmpManager();
+        
+        }else if (managerAction  === "Main Menu"){
+          userInfo();
+    }
+  });  
+ }
+     
+//  return list of managers
+       
+        function getManagerNames(){     
+          connection.query("Select * FROM manager_data", function(err, res){
+              if (err) throw err;
+              console.log(err);
+              console.table(res);
+              getManager();
           })
-      })
-  }
+        }
+
+
