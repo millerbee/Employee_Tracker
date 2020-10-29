@@ -1,9 +1,10 @@
-var mysql = require("mysql"); 
 const inquirer = require("inquirer");
 const console = require('console');
+var mysql = require("mysql");
+const consoleTable = require("console.table");
 
 // I have created views in mysql so pulling data here is easier
-var connection = mysql.createConnection({
+const connection = mysql.createConnection({
   host: "localhost",
   port: 3306,
   user: "root",
@@ -15,7 +16,6 @@ var connection = mysql.createConnection({
 
 connection.connect(function(err) {
   if (err) throw err;
-  console.log("connected as id " + connection.threadId + "\n");
   userInfo();
 });
 
@@ -29,123 +29,113 @@ function userInfo() {
       message: "Choose an option: ",
       name: "options",
       choices: [
-        "View Employee data",
-        "Add Employee data",
-        "Delete Employee data",
-        "Update Employee Role",
-        "Update Employee Manager",
-        "View Department Budget", 
+        "Employee",
+        "Manager",
+        "Department",
+        "Budget",
         "Exit"]
       },
-    ]).then(function({options}){
-      if(options === "View Employee data"){
-        getEmpData();
-
-      }else if (options === "Add Employee data"){
-        addEmpData();
-      }else if (options === "Delete Employee data"){
-        deleteEmpData();
-      }else if (options === "Update Employee Role"){
-        updateEmpRole();
-
-      }else if (options === "Update Employee Manager"){
-        updateEmpManager();
-
-      }else if (options === "View Department Budget"){
-         viewBudget();
-      }else if (options === "Exit"){
-        closeApp();
+    ]).then(function(answer){
+      if(answer.options === "Employee"){
+        getEmpOptions();
+      }else if (answer.options  === "Manager"){
+        getManager();
+      }else if (answer.options === "Department"){
+        getDept();
+      }else if (answer.options === "Budget"){
+        getBudget();
+      }else if (answer.options  === "Exit"){
+        console.log("Goodbye")
+        connection.end();
       }
     
     });
   }
+ 
   // to view emp, roles,dept or all
-  async function getEmpData() {
+   function getEmpOptions() {
 
-       return inquirer.prompt([
+       inquirer.prompt(
          {
            type: "list",
-           message: "Select a View: ",
-           name: "views",
-           choices: ["View Employees", "View Roles", "View Departments", "View All", "Main Menu"]           
+           message: "Select an action:",
+           name: "empAction",
+           choices: ["View Employees", "Add Employee", "Update Employee", "Remove Employee", "Main Menu"]           
          },
 
-       ]).then(function({views}) {
-        if(views === "View Employees"){
-          connection.query("Select * From empNames", function(err, res){
-            if (err) throw err; 
-            console.table(res); 
-             getEmpData()});
+        ).then(function({empAction}) {
+        if(empAction === "View Employees"){   
+             getEmpData();
 
-        }else if(views === "View Roles"){
-          connection.query("Select title from role", function(err, res){
-            if (err) throw err; 
-            console.table(res);
-            getEmpData()}); 
+        }else if(empAction  === "Add Employees"){           
+            addEmp(); 
 
+        }else if(empAction === "Update Employees"){
+          updateEmp();
+               
+        }else if (empAction === "Remove Employees"){
+            removeEmp();
 
-        }else if(views === "View Departments"){
-          connection.query("Select name from department", function(err, res){
-            if (err) throw err; 
-            console.table(res);
-            getEmpData()}); 
-
-        }else if (views === "View All"){
-          connection.query("SELECT * from empData", function(err, res){
-            if (err) throw err; 
-            console.table(res); 
-            getEmpData()}); 
-
-        }else if (views === "Main Menu"){
+        }else if (empAction  === "Main Menu"){
           userInfo();
         }
       })  
-    } 
+    }; 
 
-   //add data to database
-   async function addEmpData(){
-    return inquirer.prompt([
-      { type: "list",
-        message: "Select the option you want to add",
-        name: "addOption",
-        choices: ["Employee", "Role", "Department"]
-   }    
+    function getEmpData(){
+      var query ="Select * From empdata";
+      connection.query(query, function(err, res){
+        if (err) throw err,
+        console.table(results), 
+        getEmpOptions();
+      })
+    }
+  
+// //    //add data to database  going to use switch/case where needed from now on.
+//      function addEmp(){
+//       return inquirer.prompt([
+//       { type: "list",
+//         message: "Select the option you want to add",
+//         name: "addOption",
+//         choices: ["Employee", "Role", "Department"]
+//       }    
       
-  ])
-}
-
+//         ]).then(function(addOption){
+//           if(addOption === "Employee"){
+//           addEmp();
+//         }else if (addOption === "Role"){
+//           addRole();
+//         }else if (options === "Department"){
+//           addDept();
+//         } 
+//       })
+//     }
   
+//     async function addEmp() {
+//       return inquirer.prompt([
+//         {
+//           type: "input",
+//           message: "Enter employees first name",
+//           name: "empFirst"
+//         },
+
+//         { tpye: "input",
+//           message: "Enter employees last name",
+//           name: "empLast"
+//         }, 
+//           {
+//             type: "list",
+//             message: "Select role id for employee",
+//             name: "newRole",
+//             choices:   connection.query("SELECT role_id, title FROM role", function (err, res) {
+//               var roleArr = [];
+//               for (let i = 0; i < res.length; i++) {
+//                   roleArr.push(res[i].title);
+//               }
+//               return roleArr;
+//             })
+//           },
+        
+//       ])
+//     }
   
-
-    
-  
-    
-
-    
-
-
-
- 
-
-    
-
-// function afterConnection() {
-//   connection.query(`select e.first_name 'Frist Name', e.last_name 'Last Name', r.title 'Role', d.name 'Dept'
-//   from department d, role r
-//   join employees e on r.role_id = e.role_id
-//   where r.dept_id = d.dept_id
-//   group by e.first_name, e.last_name
-//   order by d.name, e.last_name`)
-  
-  
-  // function(err, rows) {
-  //   if (err) throw err;
-  //   //  Object.keys(result).forEach(function(key) {
-  //   //      var rows = result[key];
-  //        //console.log(row.first_name)
-  //    })
-   
-  
-
-  
-
