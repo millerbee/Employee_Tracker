@@ -19,11 +19,7 @@ select * from emp_data
 where role = 'Manager'
 
 
-create view budget_view AS
-select SUM(r.salary) as Budget, d.name as Department
-from roles r
-join department d on d.dept_id = r.dept_id
-group by d.name
+
 
 
 

@@ -85,7 +85,7 @@ function userInfo() {
     } 
   
     function getEmpTable(){     
-        connection.query("Select * FROM emp_data order by dept", function(err, res){
+        connection.query("Select * FROM emp_data order by dept, employee", function(err, res){
             if (err) throw err;
             console.log(err);
             console.table(res);
@@ -118,7 +118,7 @@ function userInfo() {
                     }
                     return roleArray;
                     },
-                    message: "Select employee's role? "
+                    message: "Select employee's role (use arrow keys)"
                 }
                 ]).then(function(answer) {
                     var roleId;
@@ -145,7 +145,7 @@ function userInfo() {
             })
         }
         function removeEmp(){
-          connection.query("SELECT name FROM emp_view", function (err, res) {
+          connection.query("SELECT name FROM emp_view or by name", function (err, res) {
             if (err) throw err;  
           })
           inquirer
@@ -172,7 +172,13 @@ function userInfo() {
                })
          }
           
-      //function updateRole()
+     function updateEmp(){
+       connection.query("Select * from emp_data", function (err, res) {
+          if(err) throw err;
+
+
+       })
+     }
 
 
 //********************************************************************************************//
@@ -204,7 +210,7 @@ function getDept() {
  });  
 }       //view current departments
         function getDeptNames(){     
-          connection.query("Select name FROM department", function(err, res){
+          connection.query("Select name FROM department or by name", function(err, res){
               if (err) throw err;
               console.log(err);
               console.table(res);
@@ -301,7 +307,7 @@ function getDept() {
 //  return list of managers
        
         function getManagerNames(){     
-          connection.query("Select * FROM emp_data where role = 'Manager' order by employee", function(err, res){
+          connection.query("Select * FROM emp_data where role like ('%Manager%') order by employee", function(err, res){
               if (err) throw err;
               console.log(err);
               console.table(res);
@@ -316,7 +322,7 @@ function getDept() {
 //  Budget
 //*********************************************************************************//
   function getBudget() {
-    connection.query("Select * from budget_view order by Department",
+    connection.query("Select Budget, Dept from budget_view order by Dept",
     function(err, res){
       if (err) throw err;
       console.log(err);
