@@ -24,3 +24,11 @@ select SUM(r.salary) as Budget, d.name as Department
 from roles r
 join department d on d.dept_id = r.dept_id
 group by d.name
+
+
+
+select sum(roles.salary), employees.role_id, roles.role_id, roles.dept_id, department.dept_id, department.name
+from employees, roles, department
+where employees.role_id =roles.role_id
+and roles.dept_id = department.dept_id
+group by department.name;
