@@ -72,10 +72,10 @@ function userInfo() {
         }else if(empAction === "Add Employee"){           
             addEmployee(); 
 
-        }else if(empAction === "Update Employees"){
+        }else if(empAction === "Update Employee"){
           updateEmp();
                
-        }else if (empAction === "Remove Employees"){
+        }else if (empAction === "Remove Employee"){
             removeEmp();
 
         }else if (empAction  === "Main Menu"){
@@ -94,8 +94,11 @@ function userInfo() {
       }
     
       function addEmployee(){
-        connection.query("SELECT * FROM roles", function (err, res) {
-        if (err) throw err;
+
+        let listRoles;
+        connection.query("SELECT * FROM roles", function(err, res) {
+          if (err) throw err;
+          listRoles = res.map(role => ({ name: role.title, value: role.role_id }));
             inquirer
             .prompt([
                 {
@@ -109,77 +112,91 @@ function userInfo() {
                     message: "Enter employees last name: "
                 },
                 {
-                    name: "role", 
-                    type: "rawlist",
-                    choices: function() {
-                    var roleArray = [];
-                    for (let i = 0; i < res.length; i++) {
-                        roleArray.push(res[i].title);
-                    }
-                    return roleArray;
-                    },
-                    message: "Select employee's role (use arrow keys)"
-                }
-                ]).then(function(answer) {
-                    var roleId;
-                    for (var i= 0; i< res.length; i++) {
-                    if (res[i].title == answer.role) {
-                        roleId = res[i];
-                        console.log(roleId)
-                    }                  
-                  }  
+                    name: "roleName", 
+                    type: "list",
+                    message: "Select employee's role:",
+                    choices: listRoles
+                }                   
+                
+                ]).then(function(answer) {                                
                     connection.query(
                     "INSERT INTO employees SET ?",
                     {
                         first_name: answer.first_name,
                         last_name: answer.last_name,
-                        role_id: answer.roleId
+                        role_id: answer.roleName
                     },
                     function (err) {
                         if (err) throw err;
                         console.log("Your employee has been added!");
                         userInfo();
-                    })
-                    
+                    }
+                    )                    
                 })
             })
-        }
+        
+        }  
+
+       //remove employee
         function removeEmp(){
-          connection.query("SELECT name FROM emp_view or by name", function (err, res) {
-            if (err) throw err;  
-          })
-          inquirer
-         .prompt([
-             {
-                 name: "empId",
-                 type: "input", 
-                 message: "Select Department to remove:",
-                               
-               }
-             ]).then(function(answer) {
-                                                          
-               connection.query(
-               "DELETE from emp_view WHERE ?",
+            connection.query("SELECT emp_id, first_name, last_name FROM employees", function (err, res) {
+              console.table(res);
+              if (err) throw err; 
+            inquirer
+           .prompt([
                {
-                   empd_id: answer.empId
-               }
-               );
-               connection.query("SELECT name FROM emp_view", function (err, res) {
-                 if (err) throw err;          
-                   console.log("Employee has been removed");
-                   getDept();
+                   name: "empNameId",
+                   type: "input", 
+                   message: "Enter Employee ID to remove employee:",
+                                 
+                 }
+               ]).then(function(answer) {
+                                                            
+                 connection.query(
+                 "DELETE from employees WHERE ?",
+                 {
+                     emp_id: answer.empNameId
+                 }
+                 );
+                 connection.query("SELECT EmployeeName FROM emp_view", function (err, res) {
+                   if (err) throw err;          
+                     console.log("Employee has been removed");
+                     getDept();
+                   })
                  })
-               })
-         }
-          
+           })
+          }
+            
+     // update Employee     
      function updateEmp(){
        connection.query("Select * from emp_data", function (err, res) {
           if(err) throw err;
 
+          inquirer.prompt[(
+            {
+              type: "list",
+              name: "emprole",
+              function() {
+                var employeeArray = [];
+                for (let i = 0; i < res.length; i++) {
+                    employeeArray.push(res[i].employee);
+                }
+                return employeeArray;
+                },
+                message: "Select employee to update:"
+            }
+          )].then(function(answer) {
+            var emprId;
+            for (var i= 0; i< res.length; i++) {
+            if (res[i].employee == answer.emprId) {
+                roleId = res[i];
+                console.log(emprId)
+            }                  
+          }  
 
        })
-     }
-
+     })
+    }
 
 //********************************************************************************************//
 //Department Actions
@@ -326,6 +343,28 @@ function getDept() {
 //*********************************************************************************//
 //  Budget
 //*********************************************************************************//
+return inquirer.prompt([
+  {
+  type: "list",
+  message: "Choose an option: ",
+  name: "options",
+  choices: [
+    "View Budget by Department",
+    "View Total Department Summary",
+    "Main Menu"]
+  },
+]).then(function(answer){
+  if(answer.options === "View Budget by Department"){
+    getDeptBudget();
+  }else if (answer.options  === "View Total Department Summary"){
+    getBudget();
+  }else if (answer.options === "Main Menu"){
+    userInfo();
+  } 
+
+});
+
+
   function getBudget() {
     connection.query("select concat('$', FORMAT(budget,0)) as Budget, dept from budget_view order by dept",
     function(err, res){
