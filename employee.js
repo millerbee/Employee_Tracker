@@ -210,7 +210,7 @@ function getDept() {
  });  
 }       //view current departments
         function getDeptNames(){     
-          connection.query("Select name FROM department or by name", function(err, res){
+          connection.query("Select name FROM department order by name", function(err, res){
               if (err) throw err;
               console.log(err);
               console.table(res);
@@ -307,7 +307,7 @@ function getDept() {
 //  return list of managers
        
         function getManagerNames(){     
-          connection.query("Select * FROM emp_data where role like ('%Manager%') order by employee", function(err, res){
+          connection.query("Select manager FROM manager_view", function(err, res){
               if (err) throw err;
               console.log(err);
               console.table(res);
@@ -315,14 +315,19 @@ function getDept() {
           })
         }
 
-  //       function viewEmpManagers(){
-  //         connection.query("Select")
-  // }
+         function viewEmpManagers(){
+           connection.query("Select employee, manager from manager_view order by manager", function(err, res){
+             if(err) throw err;
+             console.log(err);
+             console.table(res);
+             getManager();
+           })
+   }
 //*********************************************************************************//
 //  Budget
 //*********************************************************************************//
   function getBudget() {
-    connection.query("Select Budget, Dept from budget_view order by Dept",
+    connection.query("select concat('$', FORMAT(budget,0)) as Budget, dept from budget_view order by dept",
     function(err, res){
       if (err) throw err;
       console.log(err);
