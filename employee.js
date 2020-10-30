@@ -172,7 +172,7 @@ function userInfo() {
                })
          }
           
-
+      //function updateRole()
 
 
 //********************************************************************************************//
@@ -283,10 +283,10 @@ function getDept() {
        },
 
       ).then(function({managerAction}) {
-        if(managerAction === "View Departments"){   
+        if(managerAction === "View Managers"){   
           getManagerNames();
 
-        }else if(managerAction === "Add Department"){           
+        }else if(managerAction === "View Employees By Manager"){           
           viewEmpManagers(); 
 
         }else if(managerAction === "Update Employee Manager"){
@@ -301,7 +301,7 @@ function getDept() {
 //  return list of managers
        
         function getManagerNames(){     
-          connection.query("Select * FROM manager_data", function(err, res){
+          connection.query("Select * FROM emp_data where role = 'Manager' order by employee", function(err, res){
               if (err) throw err;
               console.log(err);
               console.table(res);
@@ -309,4 +309,18 @@ function getDept() {
           })
         }
 
-
+  //       function viewEmpManagers(){
+  //         connection.query("Select")
+  // }
+//*********************************************************************************//
+//  Budget
+//*********************************************************************************//
+  function getBudget() {
+    connection.query("Select * from budget_view order by Department",
+    function(err, res){
+      if (err) throw err;
+      console.log(err);
+      console.table(res);
+       userInfo();
+    })
+  }
