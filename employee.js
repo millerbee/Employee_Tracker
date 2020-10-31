@@ -4,7 +4,7 @@ var mysql = require("mysql");
 const consoleTable = require("console.table");
 const chalk = require('chalk');
 let empidWhere;
-
+let empidRole;
 // I have created views in mysql so pulling data here is easier
 const connection = mysql.createConnection({
   host: "localhost",
@@ -116,7 +116,7 @@ function userInfo() {
                     type: "list",
                     message: "Select employee's role:",
                     choices: listRoles
-                }                   
+                },             
                 
                 ]).then(function(answer) {                                
                     connection.query(
@@ -167,35 +167,65 @@ function userInfo() {
            })
           }
             
-     // update Employee     
+     // update Employee Role    
             function updateEmp(){
-             connection.query("Select * from emp_data", function (err, res) {
-              if(err) throw err;
-
-              inquirer.prompt[(
-              {
-              type: "list",
-              name: "emprole",
-              function() {
-                var employeeArray = [];
-                for (let i = 0; i < res.length; i++) {
-                    employeeArray.push(res[i].employee);
-                }
-                return employeeArray;
-                },
-                message: "Select employee to update:"
-            }
-          )].then(function(answer) {
-             var emprId;
-            for (var i= 0; i< res.length; i++) {
-            if (res[i].employee == answer.emprId) {
-                roleId = res[i];
-                console.log(emprId)
-            }                  
-          }  
-       })
-     })
-    }
+              connection.query("SELECT Employee, Role, EmployeeID FROM emp_roledata", function(err, res) {
+                if (err) throw err;
+               //get employee name and role
+                listEmpRole = res.map(empRole => ({name: empRole.Employee, value: empRole.EmployeeID}));
+             
+                  inquirer
+                  .prompt([
+                      {
+                          name: "emp_role",
+                          type: "list", 
+                          message: "Select employee to update: ",
+                          choices: listEmpRole
+                      }
+                    
+                    ]).then(function(answer) {
+                      empidRole = answer.emp_role
+                      connection.query("Select distinct title, role_id from roles", function(err,res) {                   
+                        if (err) throw err;
+                       //get role id and role title
+                        listroles = res.map(roleName => ({name: roleName.title, value: roleName.role_id}))
+                       
+                        inquirer
+                        .prompt([
+                          {
+                              name: "roleId",
+                              type: "list",
+                              message: "Select new Role for Employee",
+                              choices: listroles
+                          }
+                          ]).then(function(answer) {     
+                                                 
+                            connection.query(
+                            "update employees set ? where ?",
+                            [{
+                                
+                                role_id: answer.roleId
+                                
+                            },
+                            {
+                                emp_id: empidRole
+                            }],                            
+                            function (err) {
+                              
+                                if (err) throw err;
+                                console.log(" Employee role has been updated!");
+                                userInfo();
+                            }
+                            )                    
+                        })
+                      })
+    
+                    })
+    
+                  })
+            
+            }  
+    
 
 //********************************************************************************************//
 //Department Actions
