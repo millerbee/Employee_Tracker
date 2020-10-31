@@ -128,7 +128,7 @@ function userInfo() {
                     },
                     function (err) {
                         if (err) throw err;
-                        console.log("Your employee has been added!");
+                        console.log("Employee has been added!");
                         userInfo();
                     }
                     )                    
@@ -147,7 +147,7 @@ function userInfo() {
                {
                    name: "empNameId",
                    type: "input", 
-                   message: "Enter Employee ID to remove employee:",
+                   message: "Enter the Employee ID you wish to remove:",
                                  
                  }
                ]).then(function(answer) {
@@ -239,7 +239,7 @@ function getDept() {
             {
                 name: "depName",
                 type: "input", 
-                message: "Enter department name to add:",
+                message: "Enter Department Name to add:",
                               
               }
             ]).then(function(answer) {
@@ -252,7 +252,7 @@ function getDept() {
               );
               connection.query("SELECT name as Dept FROM department", function (err, res) {
                 if (err) throw err;          
-                  console.log("Department has been added.");
+                  console.log("Department has been added!");
                   getDept();
                 });
               })
