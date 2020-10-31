@@ -97,7 +97,7 @@ function userInfo() {
       function addEmployee(){
         let listRoles;
         connection.query("SELECT * FROM roles", function(err, res) {
-          if (err) throw err;
+          if(err) throw err;
           listRoles = res.map(role => ({ name: role.title, value: role.role_id }));
             inquirer
             .prompt([
@@ -161,7 +161,7 @@ function userInfo() {
                  connection.query("SELECT EmployeeName FROM emp_view", function (err, res) {
                    if (err) throw err;          
                      console.log("Employee has been removed");
-                     getDept();
+                     getEmpOptions();
                    })
                  })
            })
@@ -323,8 +323,7 @@ function getDept() {
         function getManagerNames(){     
           connection.query("select Employee, role as Role From emp_data where role like '%Manager' OR role like '%Director' OR role like '%Officer' ORDER BY Role",
            function(err, res){
-              if (err) throw err;
-              console.log(err);
+              if (err) throw err
               console.table(res);
               getManager();
           });
@@ -333,7 +332,6 @@ function getDept() {
          function viewEmpManagers(){
            connection.query("Select employee, manager from manager_view order by manager", function(err, res){
              if(err) throw err;
-             console.log(err);
              console.table(res);
              getManager();
            });
@@ -409,8 +407,7 @@ function getDept() {
   function getBudget() {
     connection.query("select concat('$', FORMAT(budget,0)) as Budget, dept from budget_view order by dept",
     function(err, res){
-      if (err) throw err;
-      console.log(err);
+      if(err) throw err;
       console.table(res);
        userInfo();
     });
