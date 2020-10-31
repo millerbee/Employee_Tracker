@@ -2,6 +2,8 @@ const inquirer = require("inquirer");
 const console = require('console');
 var mysql = require("mysql");
 const consoleTable = require("console.table");
+const chalk = require('chalk');
+let empidWhere;
 
 // I have created views in mysql so pulling data here is easier
 const connection = mysql.createConnection({
@@ -46,7 +48,7 @@ function userInfo() {
       }else if (answer.options === "Budget"){
         getBudget();
       }else if (answer.options  === "Exit"){
-        console.log("Goodbye")
+        console.log(chalk.red("Goodbye"))
         connection.end();
       }
     
@@ -62,7 +64,7 @@ function userInfo() {
            type: "list",
            message: "Select an action:",
            name: "empAction",
-           choices: ["View Employees", "Add Employee", "Update Employee", "Remove Employee", "Main Menu"]           
+           choices: ["View Employees", "Add Employee", "Update Employee Role", "Remove Employee", "Main Menu"]           
          },
 
         ).then(function({empAction}) {
@@ -72,7 +74,7 @@ function userInfo() {
         }else if(empAction === "Add Employee"){           
             addEmployee(); 
 
-        }else if(empAction === "Update Employee"){
+        }else if(empAction === "Update Employee Role"){
           updateEmp();
                
         }else if (empAction === "Remove Employee"){
@@ -87,14 +89,12 @@ function userInfo() {
     function getEmpTable(){     
         connection.query("Select * FROM emp_data order by dept, employee", function(err, res){
             if (err) throw err;
-            console.log(err);
             console.table(res);
             getEmpOptions();
-        })
+        });
       }
     
       function addEmployee(){
-
         let listRoles;
         connection.query("SELECT * FROM roles", function(err, res) {
           if (err) throw err;
@@ -168,12 +168,12 @@ function userInfo() {
           }
             
      // update Employee     
-     function updateEmp(){
-       connection.query("Select * from emp_data", function (err, res) {
-          if(err) throw err;
+            function updateEmp(){
+             connection.query("Select * from emp_data", function (err, res) {
+              if(err) throw err;
 
-          inquirer.prompt[(
-            {
+              inquirer.prompt[(
+              {
               type: "list",
               name: "emprole",
               function() {
@@ -186,14 +186,13 @@ function userInfo() {
                 message: "Select employee to update:"
             }
           )].then(function(answer) {
-            var emprId;
+             var emprId;
             for (var i= 0; i< res.length; i++) {
             if (res[i].employee == answer.emprId) {
                 roleId = res[i];
                 console.log(emprId)
             }                  
           }  
-
        })
      })
     }
@@ -202,7 +201,6 @@ function userInfo() {
 //Department Actions
 //*******************************************************************************************//
 function getDept() {
-
   inquirer.prompt(
     {
       type: "list",
@@ -227,14 +225,13 @@ function getDept() {
  });  
 }       //view current departments
         function getDeptNames(){     
-          connection.query("Select name FROM department order by name", function(err, res){
+          connection.query("Select name AS Dept FROM department order by name", function(err, res){
               if (err) throw err;
-              console.log(err);
               console.table(res);
               getDept();
-          })
+          });
         }
-      //add a department
+          //add a department
          function addDepartment(){
          
          inquirer
@@ -253,17 +250,17 @@ function getDept() {
                   name: answer.depName
               }
               );
-              connection.query("SELECT name FROM department", function (err, res) {
+              connection.query("SELECT name as Dept FROM department", function (err, res) {
                 if (err) throw err;          
-                  console.log("Depatment has been added.");
+                  console.log("Department has been added.");
                   getDept();
-                })
+                });
               })
         }
           
       //remove a department  
         function removeDept(){
-          connection.query("SELECT name FROM department", function (err, res) {
+          connection.query("SELECT name AS Dept FROM department", function (err, res) {
             console.table(res);
             if (err) throw err; 
           inquirer
@@ -282,7 +279,7 @@ function getDept() {
                    name: answer.depName
                }
                );
-               connection.query("SELECT name FROM department", function (err, res) {
+               connection.query("SELECT name AS Dept FROM department", function (err, res) {
                  if (err) throw err;          
                    console.log("Depatment has been removed");
                    getDept();
@@ -324,12 +321,13 @@ function getDept() {
 //  return list of managers
        
         function getManagerNames(){     
-          connection.query("Select manager FROM manager_view", function(err, res){
+          connection.query("select Employee, role as Role From emp_data where role like '%Manager' OR role like '%Director' OR role like '%Officer' ORDER BY Role",
+           function(err, res){
               if (err) throw err;
               console.log(err);
               console.table(res);
               getManager();
-          })
+          });
         }
 
          function viewEmpManagers(){
@@ -338,32 +336,75 @@ function getDept() {
              console.log(err);
              console.table(res);
              getManager();
-           })
+           });
    }
+
+        function updateEmpManager() {
+         
+          connection.query("SELECT * FROM emp_toupdate", function(err, res) {
+            if (err) throw err;
+         
+            listEmps = res.map(empName => ({name: empName.Employee, value: empName.EmployeeID}));
+         
+              inquirer
+              .prompt([
+                  {
+                      name: "emp_name",
+                      type: "list", 
+                      message: "Select employee to update: ",
+                      choices: listEmps
+                  }
+                
+                ]).then(function(answer) {
+                  empidWhere = answer.emp_name
+                  connection.query("Select distinct Manager, Mgr_Id from manager_view", function(err,res) {                   
+                    if (err) throw err;
+                   
+                    listMan = res.map(manName => ({name: manName.Manager, value: manName.Mgr_Id}))
+                   
+                    inquirer
+                    .prompt([
+                      {
+                          name: "man_name",
+                          type: "list",
+                          message: "Select new manager for employee",
+                          choices: listMan
+                      }
+                      ]).then(function(answer) {     
+                                               
+                        connection.query(
+                        "update employees set ? where ?",
+                        [{
+                            
+                            manager_id: answer.man_name
+                            
+                        },
+                        {
+                            emp_id: empidWhere
+                        }],
+                      
+                        function (err) {
+                            if (err) throw err;
+                            console.log("Your employee has been updated!");
+                            userInfo();
+                        }
+                        )                    
+                    })
+                  })
+
+                })
+
+              })
+        
+        }  
+
+
+
+
+
 //*********************************************************************************//
 //  Budget
 //*********************************************************************************//
-return inquirer.prompt([
-  {
-  type: "list",
-  message: "Choose an option: ",
-  name: "options",
-  choices: [
-    "View Budget by Department",
-    "View Total Department Summary",
-    "Main Menu"]
-  },
-]).then(function(answer){
-  if(answer.options === "View Budget by Department"){
-    getDeptBudget();
-  }else if (answer.options  === "View Total Department Summary"){
-    getBudget();
-  }else if (answer.options === "Main Menu"){
-    userInfo();
-  } 
-
-});
-
 
   function getBudget() {
     connection.query("select concat('$', FORMAT(budget,0)) as Budget, dept from budget_view order by dept",
@@ -372,5 +413,10 @@ return inquirer.prompt([
       console.log(err);
       console.table(res);
        userInfo();
-    })
+    });
   }
+
+  
+
+
+  
