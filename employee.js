@@ -96,9 +96,16 @@ function userInfo() {
     
       function addEmployee(){
         let listRoles;
+        let listDept;
         connection.query("SELECT * FROM roles", function(err, res) {
           if(err) throw err;
           listRoles = res.map(role => ({ name: role.title, value: role.role_id }));
+
+        connection.query("select name from department ORDER BY name",
+          function(err, res){
+             if (err) throw err
+             console.table(res);
+             listDept = res.map(deptName => ({name: deptName.name, value: deptName.dept_id}))
             inquirer
             .prompt([
                 {
@@ -116,7 +123,13 @@ function userInfo() {
                     type: "list",
                     message: "Select employee's role:",
                     choices: listRoles
-                },             
+                },
+                {
+                    name: "deptName",
+                    type: "list",
+                    message: "Select Department:",
+                    choices: listDept
+                }             
                 
                 ]).then(function(answer) {                                
                     connection.query(
@@ -124,7 +137,8 @@ function userInfo() {
                     {
                         first_name: answer.first_name,
                         last_name: answer.last_name,
-                        role_id: answer.roleName
+                        role_id: answer.roleName,
+                        dept_id: answer.deptName
                     },
                     function (err) {
                         if (err) throw err;
@@ -134,7 +148,7 @@ function userInfo() {
                     )                    
                 })
             })
-        
+          })
         }  
 
        //remove employee

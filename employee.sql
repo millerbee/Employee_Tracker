@@ -46,3 +46,8 @@ VALUES ("Finance Manager", "100000");
 
 INSERT INTO roles (title, salary)
 VALUES ("Sales Director", "200000");
+
+create view emp_roledata AS
+select concat(employees.first_name,' ', employees.last_name) AS Employee, roles.role_id as RoleID, roles.title AS Role, employees.emp_id as EmployeeID
+from employees, roles
+where roles.role_id = employees.role_id;
