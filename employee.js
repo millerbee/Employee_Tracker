@@ -158,7 +158,7 @@ function userInfo() {
              role_id: answer.roleId
          }
          );
-         connection.query("SELECT role_id, title as Role from roles", function (err, res) {
+         connection.query("SELECT role_id, title as Role from roles or by title", function (err, res) {
            if (err) throw err;          
              console.log("Role has been removed");
              getRoleOptions();
@@ -207,7 +207,7 @@ function userInfo() {
     
       function addEmployee(){
         
-        connection.query("SELECT title, role_id FROM roles", function(err, res) {
+        connection.query("SELECT title, role_id FROM roles order by title", function(err, res) {
           if(err) throw err;
           listRoles = res.map(role => ({ name: role.title, value: role.role_id }));
 
@@ -233,7 +233,7 @@ function userInfo() {
                    newrole=answer.roleName,
                    fname = answer.first_name,
                    lname = answer.last_name
-                  connection.query("Select  Employee, Emp_Id from manager_view", function(err,res) {
+                  connection.query("Select  Employee, Emp_Id from manager_view order by Employee", function(err,res) {
                     if(err) throw err;
                     listMan = res.map(manName => ({name: manName.Employee, value: manName.Emp_Id}))
                     
@@ -271,7 +271,7 @@ function userInfo() {
 
        //remove employee
         function removeEmp(){
-            connection.query("SELECT emp_id, first_name, last_name FROM employees", function (err, res) {
+            connection.query("SELECT emp_id, first_name, last_name FROM employees order by first_name, last_name", function (err, res) {
               console.table(res);
               if (err) throw err; 
             inquirer
@@ -290,7 +290,7 @@ function userInfo() {
                      emp_id: answer.empNameId
                  }
                  );
-                 connection.query("SELECT EmployeeName FROM emp_view", function (err, res) {
+                 connection.query("SELECT EmployeeName FROM emp_view order by EmployeeName", function (err, res) {
                    if (err) throw err;          
                      console.log("Employee has been removed");
                      getEmpOptions();
@@ -301,7 +301,7 @@ function userInfo() {
             
      // update Employee Role    
             function updateEmp(){
-              connection.query("SELECT Employee, Role, EmployeeID FROM emp_roledata", function(err, res) {
+              connection.query("SELECT Employee, Role, EmployeeID FROM emp_roledata order by Employee", function(err, res) {
                 if (err) throw err;
                //get employee name and role
                 listEmpRole = res.map(empRole => ({name: empRole.Employee, value: empRole.EmployeeID}));
@@ -317,7 +317,7 @@ function userInfo() {
                     
                     ]).then(function(answer) {
                       empidRole = answer.emp_role
-                      connection.query("Select distinct title, role_id from roles", function(err,res) {                   
+                      connection.query("Select distinct title, role_id from roles order by title", function(err,res) {                   
                         if (err) throw err;
                        //get role id and role title
                         listroles = res.map(roleName => ({name: roleName.title, value: roleName.role_id}))
@@ -412,7 +412,7 @@ function getDept() {
                   name: answer.depName
               }
               );
-              connection.query("SELECT name as Dept FROM department", function (err, res) {
+              connection.query("SELECT name as Dept FROM department order by name", function (err, res) {
                 if (err) throw err;          
                   console.log("Department has been added!");
                   getDept();
@@ -422,7 +422,7 @@ function getDept() {
           
       //remove a department  
         function removeDept(){
-          connection.query("SELECT name AS Dept FROM department", function (err, res) {
+          connection.query("SELECT name AS Dept FROM department order by name", function (err, res) {
             console.table(res);
             if (err) throw err; 
           inquirer
@@ -441,7 +441,7 @@ function getDept() {
                    name: answer.depName
                }
                );
-               connection.query("SELECT name AS Dept FROM department", function (err, res) {
+               connection.query("SELECT name AS Dept FROM department order name", function (err, res) {
                  if (err) throw err;          
                    console.log("Depatment has been removed");
                    getDept();
@@ -516,7 +516,7 @@ function getDept() {
                 
                 ]).then(function(answer) {
                   empidWhere = answer.emp_name
-                  connection.query("Select  Employee, Emp_Id from manager_view", function(err,res) {                   
+                  connection.query("Select  Employee, Emp_Id from manager_view order by Employee", function(err,res) {                   
                     if (err) throw err;
                    
                     listMan = res.map(manName => ({name: manName.Employee, value: manName.Emp_Id}))
