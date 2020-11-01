@@ -198,7 +198,7 @@ function userInfo() {
     } 
   
     function getEmpTable(){     
-        connection.query("Select * FROM emp_data order by dept, employee", function(err, res){
+        connection.query("Select * FROM emp_data order by employee, dept", function(err, res){
             if (err) throw err;
             console.table(res);
             getEmpOptions();
@@ -483,7 +483,7 @@ function getDept() {
 //  return list of managers
        
         function getManagerNames(){     
-          connection.query("select Employee, role as Role From emp_data where role like '%Manager' OR role like '%Director' OR role like '%Officer' ORDER BY Role",
+          connection.query("select Employee, role as Role From emp_data where role like '%Manager' OR role like '%Director' OR role like '%Officer' ORDER BY Employee",
            function(err, res){
               if (err) throw err
               console.table(res);
@@ -492,7 +492,7 @@ function getDept() {
         }
 
          function viewEmpManagers(){
-           connection.query("Select employee, manager from manager_view order by manager", function(err, res){
+           connection.query("Select manager, employee from manager_view order by manager, employee", function(err, res){
              if(err) throw err;
              console.table(res);
              getManager();
