@@ -49,7 +49,7 @@ function userInfo() {
       }else if (answer.options === "Department"){
         getDept();
       }else if (answer.options === "Role"){
-        addRoleOptions();
+        getRoleOptions();
       }else if (answer.options === "Budget"){
         getBudget();
       }else if (answer.options  === "Exit"){
@@ -63,14 +63,14 @@ function userInfo() {
   // Employee Actions
   //*******************************************************************************************//
 
-  function addRoleOptions(){
+  function getRoleOptions(){
 
     inquirer.prompt(
       {
         type: "list",
-        message: "Add a role:",
+        message: "Choose an option:",
         name: "roleAction",
-        choices: ["View Roles", "Add Role", "Main Menu"]           
+        choices: ["View Roles", "Add Role", "Remove Role", "Main Menu"]           
       },
       ).then(function({roleAction}) {
         if(roleAction === "View Roles"){   
@@ -78,7 +78,8 @@ function userInfo() {
 
         }else if(roleAction === "Add Role"){           
             addRole(); 
-
+        }else if(roleAction === "Remove Role"){
+            removeRole();
         }else if (roleAction  === "Main Menu"){
           userInfo();
         }
@@ -89,7 +90,7 @@ function userInfo() {
       connection.query("Select title AS Roles from roles order by title", function(err, res){
         if (err) throw err;
         console.table(res);
-        addRoleOptions();
+        getRoleOptions();
     });
   }
     
@@ -132,12 +133,40 @@ function userInfo() {
             if (err) throw err;
            
             console.log("Role has been added!");
-            addRoleOptions();
+            getRoleOptions();
             })
           }); 
         }) 
     }
-  
+    function removeRole(){
+      connection.query("SELECT role_id, title as Role FROM roles order by title", function (err, res) {
+      console.table(res);
+      if (err) throw err; 
+      inquirer
+      .prompt([
+       {
+           name: "roleId",
+           type: "input", 
+           message: "Enter the Role ID you wish to remove:",
+                         
+         }
+       ]).then(function(answer) {
+                                                    
+         connection.query(
+         "DELETE from roles WHERE ?",
+         {
+             role_id: answer.roleId
+         }
+         );
+         connection.query("SELECT role_id, title as Role from roles", function (err, res) {
+           if (err) throw err;          
+             console.log("Role has been removed");
+             getRoleOptions();
+           })
+         })
+   })
+    }
+   
 
    function getEmpOptions() {
 
