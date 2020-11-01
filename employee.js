@@ -123,9 +123,9 @@ function userInfo() {
                    newrole=answer.roleName,
                    fname = answer.first_name,
                    lname = answer.last_name
-                  connection.query("Select distinct Manager, Mgr_Id from manager_view", function(err,res) {
+                  connection.query("Select  Employee, Emp_Id from manager_view", function(err,res) {
                     if(err) throw err;
-                    listMan = res.map(manName => ({name: manName.Manager, value: manName.Mgr_Id}))
+                    listMan = res.map(manName => ({name: manName.Employee, value: manName.Emp_Id}))
                     
                     inquirer.prompt([
                       {
@@ -406,10 +406,10 @@ function getDept() {
                 
                 ]).then(function(answer) {
                   empidWhere = answer.emp_name
-                  connection.query("Select distinct Manager, Mgr_Id from manager_view", function(err,res) {                   
+                  connection.query("Select  Employee, Emp_Id from manager_view", function(err,res) {                   
                     if (err) throw err;
                    
-                    listMan = res.map(manName => ({name: manName.Manager, value: manName.Mgr_Id}))
+                    listMan = res.map(manName => ({name: manName.Employee, value: manName.Emp_Id}))
                    
                     inquirer
                     .prompt([
