@@ -4,7 +4,8 @@ var mysql = require("mysql");
 const consoleTable = require("console.table");
 const chalk = require('chalk');
 let empidWhere;
-let empidRole;
+let depidWhere;
+let roleidWhere;
 // I have created views in mysql so pulling data here is easier
 const connection = mysql.createConnection({
   host: "localhost",
@@ -95,17 +96,11 @@ function userInfo() {
       }
     
       function addEmployee(){
-        let listRoles;
-        let listDept;
-        connection.query("SELECT * FROM roles", function(err, res) {
+        
+        connection.query("SELECT title, role_id FROM roles", function(err, res) {
           if(err) throw err;
           listRoles = res.map(role => ({ name: role.title, value: role.role_id }));
 
-        connection.query("select name from department ORDER BY name",
-          function(err, res){
-             if (err) throw err
-             console.table(res);
-             listDept = res.map(deptName => ({name: deptName.name, value: deptName.dept_id}))
             inquirer
             .prompt([
                 {
@@ -123,33 +118,46 @@ function userInfo() {
                     type: "list",
                     message: "Select employee's role:",
                     choices: listRoles
-                },
-                {
-                    name: "deptName",
-                    type: "list",
-                    message: "Select Department:",
-                    choices: listDept
-                }             
-                
-                ]).then(function(answer) {                                
+                }                          
+                ]).then(function(answer) { 
+                   newrole=answer.roleName,
+                   fname = answer.first_name,
+                   lname = answer.last_name
+                  connection.query("Select distinct Manager, Mgr_Id from manager_view", function(err,res) {
+                    if(err) throw err;
+                    listMan = res.map(manName => ({name: manName.Manager, value: manName.Mgr_Id}))
+                    
+                    inquirer.prompt([
+                      {
+                        name: "man_name",
+                        type: "list",
+                        message: "Select Manager",
+                        choices: listMan
+                      }
+                    ]).then(function(answer) {
                     connection.query(
-                    "INSERT INTO employees SET ?",
+                    "INSERT INTO employees SET ? ",
                     {
-                        first_name: answer.first_name,
-                        last_name: answer.last_name,
-                        role_id: answer.roleName,
-                        dept_id: answer.deptName
-                    },
+                        first_name: fname,
+                        last_name: lname,
+                        role_id: newrole,
+                        manager_id: answer.man_name
+                    },  
                     function (err) {
+                      
                         if (err) throw err;
+                       
                         console.log("Employee has been added!");
                         userInfo();
                     }
-                    )                    
-                })
+                    )
+                  })    
+                })                
+              })
             })
-          })
-        }  
+          
+        
+      }  
 
        //remove employee
         function removeEmp(){
@@ -381,8 +389,7 @@ function getDept() {
            });
    }
 
-        function updateEmpManager() {
-         
+        function updateEmpManager() {        
           connection.query("SELECT * FROM emp_toupdate", function(err, res) {
             if (err) throw err;
          
