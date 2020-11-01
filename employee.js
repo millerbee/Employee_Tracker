@@ -3,6 +3,7 @@ const console = require('console');
 var mysql = require("mysql");
 const consoleTable = require("console.table");
 const chalk = require('chalk');
+const { allowedNodeEnvironmentFlags } = require("process");
 let empidWhere;
 let depidWhere;
 let roleidWhere;
@@ -36,6 +37,7 @@ function userInfo() {
         "Employee",
         "Manager",
         "Department",
+        "Role",
         "Budget",
         "Exit"]
       },
@@ -46,6 +48,8 @@ function userInfo() {
         getManager();
       }else if (answer.options === "Department"){
         getDept();
+      }else if (answer.options === "Role"){
+        addRoleOptions();
       }else if (answer.options === "Budget"){
         getBudget();
       }else if (answer.options  === "Exit"){
@@ -58,6 +62,83 @@ function userInfo() {
  //*******************************************************************************************//
   // Employee Actions
   //*******************************************************************************************//
+
+  function addRoleOptions(){
+
+    inquirer.prompt(
+      {
+        type: "list",
+        message: "Add a role:",
+        name: "roleAction",
+        choices: ["View Roles", "Add Role", "Main Menu"]           
+      },
+      ).then(function({roleAction}) {
+        if(roleAction === "View Roles"){   
+             getRole();
+
+        }else if(roleAction === "Add Role"){           
+            addRole(); 
+
+        }else if (roleAction  === "Main Menu"){
+          userInfo();
+        }
+      });  
+    } 
+   
+    function getRole(){
+      connection.query("Select title AS Roles from roles order by title", function(err, res){
+        if (err) throw err;
+        console.table(res);
+        addRoleOptions();
+    });
+  }
+    
+   function addRole(){
+      connection.query("Select name, dept_id from Department order by name", function(err, res) {
+        if(err) throw err;
+        listDept = res.map(department => ({ name: department.name, value: department.dept_id}))
+     
+    inquirer
+    .prompt([
+        {
+            name: "roleName",
+            type: "input", 
+            message: "Enter Role to add:",               
+          },
+          {
+            name: "newSalary",
+            type: "input",
+            message: "Enter Salary",
+          },
+          {
+            name: "deptId",
+            type: "list",
+            message: "Select Department",
+            choices: listDept
+          }
+        ]).then(function(answer) {
+                newRole=answer.roleName,
+                salary=answer.newSalary,
+                dept=answer.deptId                                   
+          connection.query(
+          "INSERT INTO roles SET ?",
+          {
+              title: answer.roleName,
+              salary: answer.newSalary,
+              dept_id: answer.deptId
+          },
+          function (err) {
+                      
+            if (err) throw err;
+           
+            console.log("Role has been added!");
+            addRoleOptions();
+            })
+          }); 
+        }) 
+    }
+  
+
    function getEmpOptions() {
 
        inquirer.prompt(
