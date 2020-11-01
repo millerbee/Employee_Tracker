@@ -158,7 +158,7 @@ function userInfo() {
              role_id: answer.roleId
          }
          );
-         connection.query("SELECT role_id, title as Role from roles or by title", function (err, res) {
+         connection.query("SELECT role_id, title as Role from roles order by title", function (err, res) {
            if (err) throw err;          
              console.log("Role has been removed");
              getRoleOptions();
@@ -441,7 +441,7 @@ function getDept() {
                    name: answer.depName
                }
                );
-               connection.query("SELECT name AS Dept FROM department order name", function (err, res) {
+               connection.query("SELECT name AS Dept FROM department order by name", function (err, res) {
                  if (err) throw err;          
                    console.log("Depatment has been removed");
                    getDept();
