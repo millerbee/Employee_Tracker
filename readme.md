@@ -11,6 +11,7 @@
   
 ## Description
   This project allows a user to view, add, update and remove Employees, Departments and Roles. The user can also view the utilized budget of each department.
+  I utilized views in MySQL to make the queries in js file cleaner on Select statements and to format the data in the views. Updates, Inserts and Deletes are on root tables.
 
 ## Table of Contents
 - [Description](#description)
@@ -24,11 +25,11 @@
 
 
 ## Installation
-will need to clone project to local machine, install npm, express and mysql. The tables will be created from the sql seed file.  Data is up to user.
+will need to clone project to local machine, install npm, express and mysql. The tables will be created from the sql seed file. 
 
 
 ## Usage
-In the console enter employee.js and select options from the main menu.  Those options will bring you to sub menus based on choice.
+In the console enter 'node employee.js' and select options from the main menu.  Those options will bring you to sub menus based on choice.
 
 ## License
 MIT
